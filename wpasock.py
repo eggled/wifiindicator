@@ -26,7 +26,15 @@ class wpaclass:
 				self.sock.send("BSS %s" % bssid)
 				self.runparse()
 	def runparse(self):
-		data = self.sock.recv(65535)
+		try:
+			data = self.sock.recv(65535)
+		except socket.timeout:
+			self.sock.send("PING")
+			try:
+				data = self.sock.recv(65535)
+			except socket.timeout:
+				print "Disconnected!"
+				sys.exit(0)
 		splitdata = re.split("[\r\n]+",data)
 		for line in splitdata:
 			try:
@@ -50,16 +58,18 @@ class wpaclass:
 		return "%s: Connected to %s strength %s, ip %s, proto %s" % (self.state, self.ssid, self.qual, self.ip, self.keymgmt)
 	def __repr__(self):
 		return str(self)
-		
-		
+	def doconnect(self,path):
+		self.sock =socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM,0)
+
+		self.sock.connect(path)
+		self.sock.bind("/tmp/%d" % os.getpid())
+
+		self.sock.send("ATTACH")
+		self.sock.send("STATUS")
+		self.sock.settimeout(1)
+		self.runparse()
 wpamon = wpaclass()
-wpamon.sock =socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM,0)
-
-wpamon.sock.connect("/var/run/wpa_supplicant/wlan0")
-wpamon.sock.bind("/tmp/%d" % os.getpid())
-
-wpamon.sock.send("STATUS")
-wpamon.runparse()
+wpamon.doconnect("/var/run/wpa_supplicant/wlan0")
 print wpamon
 while 1:
 	wpamon.runparse()

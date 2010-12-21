@@ -1,0 +1,9 @@
+I know there are lots of wifi tray-based applications out there, but they all suck in some way or another (Looking at you, network manager, and you too, wicd)
+
+They are slow, don't accept configurations they claim to accept (WPA2 Enterprise? fughettaboutit), and give meaningless error messages (like "Bad Password", when they really mean "I know I *claim* to support this method of encryption, but I don't really")
+
+The only reliable option is wpa_supplicant, and that's a pain in the neck - luckily configuration is a one-time thing (you never lose the config & configuration backups are trivial).  Once it's configured, it works great. With one downside. There's no notification of connectivity. You can't tell if you're connected, or to what network, without firing up a terminal & hitting up wpa_cli.  Much more work than glancing at an icon or mousing over for details.
+
+So, this (alpha release) software puts a signal strength indicator in your tray, and if you mouseover, it will tell you network name, signal strength, IP, and connection protocol.
+
+Right now, it only works if your wpa_supplicant ctrl_interface option points to /var/wpa_supplicant. It also only works if your interface is wlan0.  Both of those should be easy fixes.  Oh, and the code's a mess; I'll work on that. I've never used a tray icon or pyinotify or the wpa_supplicant socket before, so all the components to this had a lot of learning involved.

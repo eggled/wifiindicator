@@ -65,10 +65,13 @@ class wpaclass:
 			ind.n.set_from_file("icon/wifi0.png")
 	def setip(self,ip):
 		self.ip = ip
+		self.setqual(self.qual)
 	def setqual(self,qual):
 		self.qual = qual
 		qual = int(qual,10)
-		if qual < 25:
+		if self.ip == "":
+			ind.n.set_from_file("icon/wifi0.png")
+		elif qual < 25:
 			ind.n.set_from_file("icon/wifi1.png")
 		elif qual < 50:
 			ind.n.set_from_file("icon/wifi2.png")

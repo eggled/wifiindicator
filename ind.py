@@ -1,24 +1,7 @@
 #!/usr/bin/env python
 import gtk,time,threading,os,signal
 
-def watchwpa():
-	print "Doing my sleeping"
-	watchwpa.n.set_from_file("icon/wifi0.png")
-	time.sleep(2)
-	watchwpa.n.set_from_file("icon/wifi1.png")
-	time.sleep(2)
-	watchwpa.n.set_from_file("icon/wifi2.png")
-	time.sleep(2)
-	watchwpa.n.set_from_file("icon/wifi3.png")
-	time.sleep(2)
-	watchwpa.n.set_from_file("icon/wifi4.png")
-	time.sleep(2)
-	print "All done!"
-	gtk.main_quit()
-	return
-
-k = threading.Thread(target=watchwpa)
-k.start()
+k = threading.Thread(target=gtk.main)
 
 class myStatusIcon(gtk.StatusIcon):
 	def __init__(self):
@@ -42,8 +25,7 @@ gtk.gdk.threads_init()
 n = myStatusIcon()
 n.connect("activate",activate)
 n.connect("popup-menu",popup)
-watchwpa.n = n
 n.set_from_file("/usr/share/pixmaps/gwibber.svg")
 n.set_tooltip_text("Egg-Wireless")
 
-gtk.main()
+k.start()

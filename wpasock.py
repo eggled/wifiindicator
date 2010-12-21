@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import socket,os,sys,re,threading,inotify,time
+import socket,os,sys,re,threading,inotify,time,ind
 
 
 class wpaclass:
@@ -36,7 +36,7 @@ class wpaclass:
 			try:
 				data = self.sock.recv(65535)
 			except:
-				print "Disconnected!"
+				self.setstate("DISCONNECTED")
 				return
 		splitdata = re.split("[\r\n]+",data)
 		for line in splitdata:
@@ -49,8 +49,6 @@ class wpaclass:
 				continue
 			if key in self.fnmap:
 				self.fnmap[key](data)
-			else:
-				print "No key for %s" % line
 			
 	def setssid(self,ssid):
 		self.ssid = ssid
@@ -64,12 +62,22 @@ class wpaclass:
 			self.keymgmt = ""
 			self.ip = ""
 			self.qual = ""
+			ind.n.set_from_file("icon/wifi0.png")
 	def setip(self,ip):
 		self.ip = ip
 	def setqual(self,qual):
 		self.qual = qual
+		qual = int(qual,10)
+		if qual < 25:
+			ind.n.set_from_file("icon/wifi1.png")
+		elif qual < 50:
+			ind.n.set_from_file("icon/wifi2.png")
+		elif qual < 75:
+			ind.n.set_from_file("icon/wifi3.png")
+		else:
+			ind.n.set_from_file("icon/wifi4.png")
 	def __str__(self):
-		return "%s: Connected to %s strength %s, ip %s, proto %s" % (self.state, self.ssid, self.qual, self.ip, self.keymgmt)
+		return "%s: \nssid: %s\nqual: %s\naddr: %s\nproto: %s" % (self.state, self.ssid, self.qual, self.ip, self.keymgmt)
 	def __repr__(self):
 		return str(self)
 	def doconnect(self,path):
@@ -98,12 +106,10 @@ def establish():
 establish()
 th = threading.Thread(target=inotify.initwatch,kwargs={'callback':establish})
 th.start()
-print wpamon
 while 1:
 	wpamon.runparse()
-	print wpamon
+	ind.n.set_tooltip_text(str(wpamon))
 	if wpamon.lackingData():
-		print "Lacking, doing a status update!"
 		time.sleep(1) ## Limit how often we'll update
 		wpamon.sock.send("STATUS")
 wpamon.sock.shutdown(socket.SHUT_RDWR)
